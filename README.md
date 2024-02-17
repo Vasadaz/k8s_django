@@ -17,17 +17,17 @@
 Запустите базу данных и сайт:
 
 ```shell
-$ docker compose up
+$ docker compose up -d
 ```
 
 В новом терминале, не выключая сайт, запустите несколько команд:
 
 ```shell
-$ docker compose run --rm web ./manage.py migrate  # создаём/обновляем таблицы в БД
-$ docker compose run --rm web ./manage.py createsuperuser  # создаём в БД учётку суперпользователя
+$ docker compose run --rm web python ./manage.py migrate  # создаём/обновляем таблицы в БД
+$ docker compose run --rm web python ./manage.py createsuperuser  # создаём в БД учётку суперпользователя
 ```
 
-Готово. Сайт будет доступен по адресу [http://127.0.0.1:8080](http://127.0.0.1:8080). Вход в админку находится по адресу [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
+Готово. Сайт будет доступен по адресу [http://127.0.0.1:8080](http://127.0.0.1:8080). Вход в админку находится по адресу [http://127.0.0.1:8080/admin/](http://127.0.0.1:8000/admin/).
 
 ## Как вести разработку
 
