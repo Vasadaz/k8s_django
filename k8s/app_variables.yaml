@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-variables
+data:
+  # DJANGO
+  ALLOWED_HOSTS: "*"
+  DEBUG: "True"
+  DJANGO_SUPERUSER_EMAIL: "example@example.com"
+  DJANGO_SUPERUSER_USERNAME: admin
+  SECRET_KEY: c2VjcmV0c2VjcmV0c2VjcmV0c2VjcmV0c2VjcmV0
+
+  # DB
+  DATABASE: postgres
+  DB_ENGINE: "django.db.backends.postgresql"
+  DB_DATABASE: app_bd
+  DB_USER: admin
+  DB_HOST: postgres-cluster-ip-service
+  DB_PORT: "5432"
