@@ -13,7 +13,7 @@ data:
   # DB
   DATABASE: postgres
   DB_ENGINE: "django.db.backends.postgresql"
-  DB_DATABASE: app_bd
+  DB_DATABASE: app_db
   DB_USER: admin
   DB_HOST: postgres-cluster-ip-service
   DB_PORT: "5432"
