@@ -1,17 +1,13 @@
-###########################
-# Migrations
-###########################
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: django-job-migrations
 spec:
-
   activeDeadlineSeconds: 120
   template:
     spec:
       containers:
-      - name: django-job-migrations
+      - name: django-job-migrations-container
         image: nikolaysysoev/django_dev_image:1.0
         imagePullPolicy: IfNotPresent
         command:
@@ -22,17 +18,17 @@ spec:
           - name: ALLOWED_HOSTS
             valueFrom:
               configMapKeyRef:
-                name: app-variables
+                name: app-config
                 key: ALLOWED_HOSTS
           - name: DB_DATABASE
             valueFrom:
-              configMapKeyRef:
-                name: app-variables
+              secretKeyRef:
+                name: app-secrets
                 key: DB_DATABASE
           - name: DB_USER
             valueFrom:
-              configMapKeyRef:
-                name: app-variables
+              secretKeyRef:
+                name: app-secrets
                 key: DB_USER
           - name: DB_PASSWORD
             valueFrom:
@@ -42,35 +38,32 @@ spec:
           - name: DB_HOST
             valueFrom:
               configMapKeyRef:
-                name: app-variables
+                name: app-config
                 key: DB_HOST
           - name: DB_PORT
             valueFrom:
               configMapKeyRef:
-                name: app-variables
+                name: app-config
                 key: DB_PORT
           - name: DEBUG
             valueFrom:
               configMapKeyRef:
-                name: app-variables
+                name: app-config
                 key: DEBUG
           - name: SECRET_KEY
             valueFrom:
               secretKeyRef:
                 name: app-secrets
                 key: SECRET_KEY
-      restartPolicy: Never
+      restartPolicy: OnFailure
   backoffLimit: 4
 ---
-###########################
-# CLearsessions
-###########################
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: django-job-clearsessions
 spec:
-  schedule: "17 3 */3 * *"
+  schedule: "*/10 * * * *"
   startingDeadlineSeconds: 10
   jobTemplate:
     spec:
@@ -78,7 +71,7 @@ spec:
       template:
         spec:
           containers:
-          - name: django-job-migrations
+          - name: django-job-clearsessions-container
             image: nikolaysysoev/django_dev_image:1.0
             imagePullPolicy: IfNotPresent
             command:
@@ -89,17 +82,17 @@ spec:
               - name: ALLOWED_HOSTS
                 valueFrom:
                   configMapKeyRef:
-                    name: app-variables
+                    name: app-config
                     key: ALLOWED_HOSTS
               - name: DB_DATABASE
                 valueFrom:
-                  configMapKeyRef:
-                    name: app-variables
+                  secretKeyRef:
+                    name: app-secrets
                     key: DB_DATABASE
               - name: DB_USER
                 valueFrom:
-                  configMapKeyRef:
-                    name: app-variables
+                  secretKeyRef:
+                    name: app-secrets
                     key: DB_USER
               - name: DB_PASSWORD
                 valueFrom:
@@ -109,17 +102,17 @@ spec:
               - name: DB_HOST
                 valueFrom:
                   configMapKeyRef:
-                    name: app-variables
+                    name: app-config
                     key: DB_HOST
               - name: DB_PORT
                 valueFrom:
                   configMapKeyRef:
-                    name: app-variables
+                    name: app-config
                     key: DB_PORT
               - name: DEBUG
                 valueFrom:
                   configMapKeyRef:
-                    name: app-variables
+                    name: app-config
                     key: DEBUG
               - name: SECRET_KEY
                 valueFrom:
