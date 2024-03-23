@@ -145,3 +145,6 @@ media/
 static/
 db_data/
 *.old
+
+# k8s
+*secrets*
