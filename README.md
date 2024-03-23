@@ -75,3 +75,83 @@ $ docker compose build web
 `ALLOWED_HOSTS` -- настройка Django со списком разрешённых адресов. Если запрос прилетит на другой адрес, то сайт ответит ошибкой 400. Можно перечислить несколько адресов через запятую, например `127.0.0.1,192.168.0.1,site.test`. [Документация Django](https://docs.djangoproject.com/en/3.2/ref/settings/#allowed-hosts).
 
 `DATABASE_URL` -- адрес для подключения к базе данных PostgreSQL. Другие СУБД сайт не поддерживает. [Формат записи](https://github.com/jacobian/dj-database-url#url-schema).
+
+
+### Как запустить приложение через k8s
+
+1. [Установить minikube](https://kubernetes.io/ru/docs/tasks/tools/install-minikube/)
+2. В директории `k8s` создать файл `secrets.yaml`. В нём будут храниться конфиденциальные данные, 
+   которые предварительно надо закодировать в [Base64](http://base64.ru/). Структура файла должна быть следующей:
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+       name: app-secrets
+   type: Opaque
+   data:
+       # Здесь как раз и указываются все конфиденциальные данные в Base64
+       DB_DATABASE: YXBwX2Ri
+       DB_USER: YWRtaW4= 
+       DB_PASSWORD: emFxMTIzZWRjeHN3Mg==
+       SECRET_KEY: c2VjcmV0c2VjcmV0c2VjcmV0c2VjcmV0c2VjcmV0 
+   ```
+3. Запустить minikube и после выполнить следующие команды:
+   ```shell
+   minikube start
+   minikube status # Проверка успешного запуска
+   minikube tunnel # Для вывода во внешний мир minikubu, который запущен в Docker
+   
+   # Следующие команды вводятся в новом оне терминала
+   minikube addons enable ingress # Установка компонентов для входящего трафика 
+   minikube dashboard # Запуск веб-интерфейса для работы с minikubu  
+   ```
+4. [Установить kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+   ```shell
+   kubectl cluster-info # Проверка установки
+   ```
+5. В файл `host` добавить строку:
+   ```text
+   127.0.0.1 star-burger.test
+   ```
+6. Запустить приложение с помощью команд:
+   ```shell
+   kubectl apply -f k8s/secrets.yaml
+   kubectl apply -f k8s/config.yaml
+   kubectl apply -f k8s/postgres.yaml
+   kubectl apply -f k8s/jobs.yaml
+   kubectl apply -f k8s/django.yaml
+   kubectl apply -f k8s/ingress.yaml
+   ```
+   Проверка запуска:
+   ```shell
+   kubectl get configmap -o wide
+   kubectl get secrets -o wide
+   kubectl get deployment -o wide
+   kubectl get pods -o wide
+   kubectl get svc -o wide
+   kubectl get pvc -o wide
+   kubectl get ingress -o wide
+   kubectl describe ingress  
+   ```
+   Набор команды, если вдруг надо полностью удалить приложение в minikube:
+   ```shell
+   kubectl delete deploy django-deployment
+   kubectl delete deploy postgres-deployment
+   kubectl delete cronjobs django-job-clearsessions
+   kubectl delete jobs django-job-migrations
+   kubectl delete svc django-cluster-ip-service
+   kubectl delete svc postgres-cluster-ip-service
+   kubectl delete ingress ingress-service
+   kubectl delete configmap app-config
+   kubectl delete pvc postgres-persistent-volume-claim
+   kubectl delete secrets app-secrets
+   ```
+7. Создать администратора Django:
+   ```shell
+   kubectl get pods -o wide 
+   # Из списка подов выбрать любой django-deployment-x...-x...
+   kubectl exec django-deployment-5bf545fd5f-6ssvw -it -- bash # Входим в терминал пода
+   # Внутри пода ddtcnb команду
+   python manage.py createsuperuser
+   ```
+8. Приложение развёрнуто и доступно по адресу http://star-burger.test
