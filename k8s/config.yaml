@@ -4,6 +4,6 @@ metadata:
   name: app-config
 data:
   ALLOWED_HOSTS: "*"
-  DEBUG: "True"
+  DEBUG: "False"
   DB_HOST: "postgres-cluster-ip-service"
   DB_PORT: "5432"
