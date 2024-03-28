@@ -151,7 +151,7 @@ $ docker compose build web
    kubectl get pods -o wide 
    # Из списка подов выбрать любой django-deployment-x...-x...
    kubectl exec django-deployment-5bf545fd5f-6ssvw -it -- bash # Входим в терминал пода
-   # Внутри пода ddtcnb команду
+   # Внутри пода ввести команду
    python manage.py createsuperuser
    ```
 8. Приложение развёрнуто и доступно по адресу http://star-burger.test
