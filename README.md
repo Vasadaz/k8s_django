@@ -109,7 +109,7 @@ $ docker compose build web
    ```shell
    kubectl cluster-info # Проверка установки
    ```
-5. В файл `host` добавить строку:
+5. [В файл `host` добавить строку](https://help.reg.ru/support/dns-servery-i-nastroyka-zony/rabota-s-dns-serverami/fayl-hosts-gde-nakhoditsya-i-kak-yego-izmenit):
    ```text
    127.0.0.1 star-burger.test
    ```
