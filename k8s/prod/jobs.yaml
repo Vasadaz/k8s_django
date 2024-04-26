@@ -1,0 +1,122 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-job-migrations
+spec:
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      containers:
+      - name: django-job-migrations-container
+        image: nikolaysysoev/django_dev_image:1.0
+        imagePullPolicy: IfNotPresent
+        command:
+          - python
+          - manage.py
+          - migrate
+        env:
+          - name: ALLOWED_HOSTS
+            valueFrom:
+              configMapKeyRef:
+                name: app-config
+                key: ALLOWED_HOSTS
+          - name: DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: DB_DATABASE
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: DB_USER
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: DB_PASSWORD
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: app-config
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: app-config
+                key: DB_PORT
+          - name: DEBUG
+            valueFrom:
+              configMapKeyRef:
+                name: app-config
+                key: DEBUG
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: app-secrets
+                key: SECRET_KEY
+      restartPolicy: OnFailure
+  backoffLimit: 4
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: django-job-clearsessions
+spec:
+  schedule: "*/10 * * * *"
+  startingDeadlineSeconds: 10
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 120
+      template:
+        spec:
+          containers:
+          - name: django-job-clearsessions-container
+            image: nikolaysysoev/django_dev_image:1.0
+            imagePullPolicy: IfNotPresent
+            command:
+              - python
+              - manage.py
+              - clearsessions
+            env:
+              - name: ALLOWED_HOSTS
+                valueFrom:
+                  configMapKeyRef:
+                    name: app-config
+                    key: ALLOWED_HOSTS
+              - name: DB_DATABASE
+                valueFrom:
+                  secretKeyRef:
+                    name: app-secrets
+                    key: DB_DATABASE
+              - name: DB_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: app-secrets
+                    key: DB_USER
+              - name: DB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: app-secrets
+                    key: DB_PASSWORD
+              - name: DB_HOST
+                valueFrom:
+                  configMapKeyRef:
+                    name: app-config
+                    key: DB_HOST
+              - name: DB_PORT
+                valueFrom:
+                  configMapKeyRef:
+                    name: app-config
+                    key: DB_PORT
+              - name: DEBUG
+                valueFrom:
+                  configMapKeyRef:
+                    name: app-config
+                    key: DEBUG
+              - name: SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: app-secrets
+                    key: SECRET_KEY
+          restartPolicy: OnFailure

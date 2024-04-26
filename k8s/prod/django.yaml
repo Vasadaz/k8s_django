@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      component: django
+  template:
+    metadata:
+      labels:
+        component: django
+    spec:
+      containers:
+        - name: django-container
+          image: nikolaysysoev/django_dev_image:1.0
+          ports:
+            - containerPort: 8000
+          command: ["bash", "-c", "python manage.py runserver 0.0.0.0:8000"]
+          env:
+            - name: ALLOWED_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: ALLOWED_HOSTS
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_DATABASE
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: DB_PASSWORD
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_PORT
+            - name: DEBUG
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DEBUG
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: SECRET_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: django
+  ports:
+    - port: 8000
+      targetPort: 8000
